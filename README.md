@@ -1,2 +1,1 @@
-# Template
-Template for noobsters.
+# PolMcFlyPlugin
