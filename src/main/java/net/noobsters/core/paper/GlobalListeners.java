@@ -41,6 +41,7 @@ public class GlobalListeners implements Listener {
         LivingEntity entity = e.getEntity();
         if (entity instanceof Giant) {
             Giant giant = (Giant) entity;
+            entity.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 20*10000, 3, false, false));
             Husk titanRider = (Husk) entity.getWorld().spawnEntity(entity.getLocation(), EntityType.HUSK);
             titanRider.setCustomName("Titan");
             titanRider.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 20*10000, 1, false, false));
@@ -53,7 +54,7 @@ public class GlobalListeners implements Listener {
     public void onAttack(PlayerDeathEvent e){
         Player player = e.getEntity();
         if(player.getLastDamageCause().getCause() == DamageCause.CUSTOM){
-            Bukkit.broadcastMessage(player.getName() + " was devoured by a titan");
+            Bukkit.broadcastMessage(player.getName() + " ha sido deborado por un Titan");
         }
 
     }
@@ -102,13 +103,12 @@ public class GlobalListeners implements Listener {
                 Giant giant = (Giant) entity;
 
                 int timer = (int) instance.getTimer().getGameTime();
-                if (timer % 5 == 0) {
-                    Bukkit.broadcastMessage(ChatColor.BLUE + "JUMP");
+                if (timer % 3 == 0) {
                     giant.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 2, 19));
                 }
 
                 if(getDistance(giant.getLocation(), loc) <= 3){
-                    player.damage(20);
+                    player.damage(10);
                 }
 
                 Husk rider = (Husk) giant.getPassengers().get(0);
@@ -117,7 +117,6 @@ public class GlobalListeners implements Listener {
                     if (rider.getTarget() == null || !(rider.getTarget() instanceof Player)) {
                         Player randomPlayer = players.get(random.nextInt(players.size()));
                         rider.setTarget(randomPlayer);
-                        Bukkit.broadcastMessage(ChatColor.BLUE + "REFRESH TARGET TO " + randomPlayer);
                     }
                 }
 
