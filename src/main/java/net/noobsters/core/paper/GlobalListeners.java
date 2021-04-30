@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Statistic;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -23,6 +24,7 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerStatisticIncrementEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.spigotmc.event.entity.EntityDismountEvent;
@@ -103,7 +105,7 @@ public class GlobalListeners implements Listener {
             titanRider.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 20 * 10000, 1, false, false));
             giant.addPassenger(titanRider);
 
-        } else if (entity.getType() == EntityType.ZOMBIE && entity.getLocation().getY() > 50 && random.nextBoolean()) {
+        } else if (entity.getType() == EntityType.ZOMBIE && entity.getLocation().getY() > 55 && random.nextBoolean()) {
             entity.getWorld().spawnEntity(entity.getLocation(), EntityType.GIANT);
         }
 
@@ -112,11 +114,16 @@ public class GlobalListeners implements Listener {
     @EventHandler
     public void killGiant(EntityDeathEvent e){
         LivingEntity entity =  e.getEntity();
-        if(entity.getType() ==  EntityType.GIANT && entity.getKiller() != null){
-            Player player = entity.getKiller();
-            player.setStatistic(Statistic.KILL_ENTITY, EntityType.ZOMBIE, player.getStatistic(Statistic.KILL_ENTITY, EntityType.ZOMBIE) +1);
+        if(entity.getType() ==  EntityType.GIANT){
+            e.getDrops().add(new ItemStack(Material.EMERALD));
 
+            if(entity.getKiller() != null){
+                Player player = entity.getKiller();
+                player.setStatistic(Statistic.KILL_ENTITY, EntityType.ZOMBIE, player.getStatistic(Statistic.KILL_ENTITY, EntityType.ZOMBIE) +1);
+    
+            }
         }
+
     }
 
     @EventHandler
@@ -139,7 +146,8 @@ public class GlobalListeners implements Listener {
     @EventHandler
     public void onTick(TimerTickEvent e) {
         Bukkit.getScheduler().runTask(instance, () -> {
-            refreshAI();
+            
+            refreshGiants();
         });
     }
 
@@ -154,7 +162,18 @@ public class GlobalListeners implements Listener {
         return (float) Math.abs(Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(z2 - z1, 2)));
     }
 
-    public void refreshAI() {
+    public Integer chooseCoord(int radius) {
+        int num = random.nextInt(radius);
+        num = random.nextBoolean() ? ~(num) : num;
+        return num;
+    }
+
+    public boolean isDay() {
+        long time = Bukkit.getWorld("world").getTime();
+        return time < 12300 || time > 23850;
+    }
+
+    public void refreshGiants() {
         List<Player> players = Bukkit.getOnlinePlayers().parallelStream().collect(Collectors.toList());
 
         players.forEach(player -> {
@@ -162,36 +181,46 @@ public class GlobalListeners implements Listener {
             World world = player.getWorld();
             Location loc = player.getLocation();
 
-            int y = (int) loc.getY();
+            int timer = (int) instance.getTimer().getGameTime();
 
-            List<Entity> list = world.getEntities().parallelStream()
-                    .filter(entity -> entity instanceof Giant && (getDistance(entity.getLocation(), loc) <= 20)
-                            && (Math.abs(y) - Math.abs(entity.getLocation().getY())) <= 20)
-                    .collect(Collectors.toList());
-
-            list.forEach(entity -> {
-
-                Giant giant = (Giant) entity;
-
-                int timer = (int) instance.getTimer().getGameTime();
-                if (timer % 5 == 0) {
-                    giant.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 2, 25));
+            if(Bukkit.getWorld("world") == world){
+                
+                if(timer % 120 == 0 && isDay()){
+                    Location spawn = player.getLocation().add(chooseCoord(20), 10, chooseCoord(20));
+                    world.spawnEntity(spawn, EntityType.GIANT);
                 }
 
-                if (getDistance(giant.getLocation(), loc) <= 5) {
-                    player.damage(5);
-                }
+                int y = (int) loc.getY();
 
-                Husk rider = (Husk) giant.getPassengers().get(0);
-                if (rider.getCustomName() != null && rider.getCustomName() == "Titan") {
-
-                    if (rider.getTarget() == null || !(rider.getTarget() instanceof Player)) {
-                        Player randomPlayer = players.get(random.nextInt(players.size()));
-                        rider.setTarget(randomPlayer);
+                List<Entity> list = world.getEntities().parallelStream()
+                        .filter(entity -> entity instanceof Giant && (getDistance(entity.getLocation(), loc) <= 20)
+                                && (Math.abs(y) - Math.abs(entity.getLocation().getY())) <= 20)
+                        .collect(Collectors.toList());
+    
+                list.forEach(entity -> {
+    
+                    Giant giant = (Giant) entity;
+    
+                    if (timer % 5 == 0) {
+                        giant.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 2, 25));
                     }
-                }
+    
+                    if (getDistance(giant.getLocation(), loc) <= 5) {
+                        player.damage(5);
+                    }
+    
+                    Husk rider = (Husk) giant.getPassengers().get(0);
+                    if (rider.getCustomName() != null && rider.getCustomName() == "Titan") {
+    
+                        if (rider.getTarget() == null || !(rider.getTarget() instanceof Player)) {
+                            Player randomPlayer = players.get(random.nextInt(players.size()));
+                            rider.setTarget(randomPlayer);
+                        }
+                    }
+    
+                });
+            }
 
-            });
         });
     }
 }
