@@ -50,16 +50,35 @@ public class GlobalListeners implements Listener {
 
             int stat = player.getStatistic(Statistic.KILL_ENTITY, EntityType.ZOMBIE);
 
-            if (player.hasPermission("prefix.fundador")) {
-                Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', "&r[&e&l" + stat
-                        + "&r] &r★ &6✦&r ★ &6&k!!!&r &lFUNDADOR&r &6&k!!!&r ★ &6✦&r ★" + name + ": &f" + msg));
+            if (player.hasPermission("prefix.op")) {
+                Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', "&r[&e&l" + stat + "&r] [&4&lADMIN&r] >&6>&r> &6&k!!!&r &LINSTRUCTOR&r &6&k!!!&r <&6<&r< " + name + ": &f" + msg));
 
-            } else if (player.hasPermission("prefix.capitan")) {
-                Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', "&r[&e&l" + stat
-                        + "&r] &r★ &6★&r &k!!!&r &6&lCAPITÁN&r &k!!!&r &6★&r ★ " + name + ": &f" + msg));
+            }else if (stat >= 200) {
+                Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', "&r[&e&l" + stat + "&r] >&6>&r> &6&k!!!&r &lFUNDADOR&r &6&k!!!&r <&6<&r< " + name + ": &f" + msg));
 
-            } else {
-                Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', "&f" + name + ": &f" + msg));
+            }else if (stat >= 160) {
+                Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', "&r[&e&l" + stat + "&r] >&6>&r &k!!!&r &6&lCAPITÁN&r &k!!!&r &6<&r< " + name + ": &f" + msg));
+
+            }else if (stat >= 130) {
+                Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', "&r[&e&l" + stat + "&r] >> &k!!&r &b&lTENIENTE&r &k!!&r << " + name + ": &f" + msg));
+
+            }else if (stat >= 100) {
+                Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', "&r[&e&l" + stat + "&r] >> &k!!&r &7&lSUBOFICIAL&r &k!!&r << " + name + ": &f" + msg));
+
+            }else if (stat >= 60) {
+                Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', "&r[&e&l" + stat + "&r] > | &e&lSOLDADO ÉLITE&r | < " + name + ": &f" + msg));
+
+            }else if (stat >= 30) {
+                Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', "&r[&e&l" + stat + "&r] &a&lSOLDADO&r | " + name + ": &f" + msg));
+
+            }else if (stat >= 15) {
+                Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', "&r[&e&l" + stat + "&r] &2EXPLORADOR&r | " + name + ": &f" + msg));
+
+            }else if (stat >= 1) {
+                Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', "&r[&e&l" + stat + "&r] &cRECLUTA&r | " + name + ": &f" + msg));
+
+            }else {
+                Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', "&r[&e&l" + stat + "&r] &7ASPIRANTE&r | " + name + ": &f" + msg));
             }
         });
     }
